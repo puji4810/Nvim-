@@ -11,7 +11,7 @@ function M.compile_and_run()
   local executable = vim.fn.shellescape(vim.fn.expand "%:r") -- 可执行文件路径
 
   -- 编译命令
-  local compile_cmd = string.format("clang++ -std=c++20 -Wall -o %s %s", executable, source_file)
+  local compile_cmd = string.format("clang++ -std=c++23 -Wall -o %s %s", executable, source_file)
 
   -- 异步编译
   vim.fn.jobstart(compile_cmd, {
@@ -29,7 +29,7 @@ function M.compile_and_run()
           on_stderr = function(_, err)
             if err then
               -- 将错误输出写入新缓冲区
-              M.create_output_buffer(err, "Error")
+              -- M.create_output_buffer(err, "Error")
             end
           end,
         })

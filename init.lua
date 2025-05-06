@@ -20,6 +20,7 @@ require "lazy_setup"
 require "polish"
 require("plugins.astrolsp")
 require("plugins.chinese")
+-- require("cpp_runner")
 -- 设置透明背景
 vim.api.nvim_set_hl(0, "Normal", { bg = "NONE" })
 vim.api.nvim_set_hl(0, "LineNr", { bg = "NONE" })
