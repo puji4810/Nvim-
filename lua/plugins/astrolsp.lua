@@ -61,6 +61,16 @@ return {
       -- rust_analyzer = false, -- setting a handler to false will disable the set up of that language server
       -- pyright = function(_, opts) require("lspconfig").pyright.setup(opts) end -- or a custom handler function can be passed
     },
+    lsp_handlers = {
+      ["textDocument/hover"] = function(err, result, ctx, config)
+        config = vim.tbl_deep_extend("force", { border = "rounded", silent = true }, config or {})
+        return vim.lsp.handlers.hover(err, result, ctx, config)
+      end,
+      ["textDocument/signatureHelp"] = function(err, result, ctx, config)
+        config = vim.tbl_deep_extend("force", { border = "rounded", silent = true, focusable = false }, config or {})
+        return vim.lsp.handlers.signature_help(err, result, ctx, config)
+      end,
+    },
     -- Configure buffer local auto commands to add when attaching a language server
     autocmds = {
       -- first key is the `augroup` to add the auto commands to (:h augroup)
@@ -96,7 +106,7 @@ return {
           function() require("astrolsp.toggles").buffer_semantic_tokens() end,
           desc = "Toggle LSP semantic highlight (buffer)",
           cond = function(client)
-            return client.supports_method "textDocument/semanticTokens/full" and vim.lsp.semantic_tokens ~= nil
+            return client:supports_method "textDocument/semanticTokens/full" and vim.lsp.semantic_tokens ~= nil
           end,
         },
       },
@@ -104,6 +114,14 @@ return {
     -- A custom `on_attach` function to be run after the default `on_attach` function
     -- takes two parameters `client` and `bufnr`  (`:h lspconfig-setup`)
     on_attach = function(client, bufnr)
+      local client_mt = getmetatable(client)
+      if client_mt and client_mt.supports_method then
+        client.supports_method = function(...)
+          local first = select(1, ...)
+          if first == client then return client_mt.supports_method(...) end
+          return client_mt.supports_method(client, ...)
+        end
+      end
       -- this would disable semanticTokensProvider for all clients
       -- client.server_capabilities.semanticTokensProvider = nil
     end,
